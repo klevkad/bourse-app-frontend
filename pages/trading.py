@@ -14,8 +14,8 @@ else:
     if st.sidebar.button("Déconnexion"):
         logout()
 
-def get_stocks():
-    return requests.get(f"{API_URL}/stocks/").json()
+def get_actions():
+    return requests.get(f"{API_URL}/actions/").json()
 
 def post_transaction(data):
     return requests.post(f"{API_URL}/transactions/", json=data)
@@ -95,7 +95,7 @@ with tab1:
         # else:
         #     st.info("Aucune transaction à afficher.")
 with tab2:
-    stocks = get_stocks()
+    stocks = get_actions()
     stock_options = {s['symbol']: s['stock_id'] for s in stocks}
     selected_stock_sym = st.selectbox("Action", list(stock_options.keys()))
     type_ordre = st.selectbox("Type", ["BUY", "SELL"])

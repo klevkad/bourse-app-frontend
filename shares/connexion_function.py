@@ -17,8 +17,9 @@ def login():
                     # Sauvegarde de la session
                     st.session_state["authenticated"] = True
                     st.session_state["user_id"] = user_id
-                    st.session_state["username"] = user_data["username"]
-                    st.success(f"Bienvenue {user_data['username']} !")
+                    st.session_state["username"] = user_data["nom_utilisateur"]
+                    st.session_state["portefeuilles"] = user_data["portefeuilles"]
+                    st.success(f"Bienvenue {user_data['nom_utilisateur']} !")
                     st.rerun()
                 else:
                     st.error("ID inconnu. Veuillez vérifier votre identifiant.")

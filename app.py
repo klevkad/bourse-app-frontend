@@ -1,5 +1,4 @@
 import streamlit as st
-import requests
 from shares.connexion_function import login, logout
 
 st.set_page_config(page_title="Authentification BRVM", layout="wide", initial_sidebar_state="expanded", page_icon="🏦")
