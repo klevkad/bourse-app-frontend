@@ -155,7 +155,7 @@ with st.form("get_data_form"):
                             'quantite': 'sum',
                             'total_cost': 'sum'
                         }).reset_index()
-
+                
                         portfolio['CMP'] = portfolio['total_cost'] / portfolio['quantite']
                         # B. Ajustement avec les ventes (pour la quantité actuelle)
                         df_sells = df_t[df_t['type_transaction'] == 'vente']
@@ -178,7 +178,7 @@ with st.form("get_data_form"):
                         portfolio.rename(columns={'action_id': 'id'}, inplace=True)
                         portfolio = portfolio.merge(df_stocks[['id', 'symbole', 'nom_entreprise','secteur']], on='id')
                         # dernier_cours de type float avec suppression des espaces
-                        portfolio['dernier_cours']= portfolio['symbole'].map(df_quotes.set_index('Symbole')['Cours Ouverture (FCFA)'].str.replace(' ','').astype(float))
+                        portfolio['dernier_cours']= portfolio['symbole'].map(df_quotes.set_index('Symbole')['Cours Clôture (FCFA)'].str.replace(' ','').astype(float))
                         st.title("📈 Analyse du Portefeuille")
                         st.divider()
                         # D. Calcul de la Plus-value
@@ -194,10 +194,10 @@ with st.form("get_data_form"):
                         total_inv = portfolio['Investissement'].sum()
                         total_plus_value_pct = (total_pv/total_inv)*100
                         col1, col2,col3, col4 = st.columns(4)
-                        col1.metric("Plus-Value Totale", f"{total_pv:,.0f} XOF", delta=f"{total_pv:,.0f}")
-                        col1.metric("Valeur Totale Portfolio", f"{portfolio['Valeur Actuelle'].sum():,.0f} XOF")
-                        col1.metric("Investissement Total", f"{total_inv:,.0f} XOF")
                         col1.metric("Plus-Value % Totale", f"{total_plus_value_pct:,.2f} %", delta=f"{total_plus_value_pct:,.0f}")
+                        col1.metric("Plus-Value Totale", f"{total_pv:,.0f} XOF", delta=f"{total_pv:,.0f}")
+                        col1.metric("Valeur Totale portefeuille", f"{portfolio['Valeur Actuelle'].sum():,.0f} XOF")
+                        col1.metric("Investissement Total", f"{total_inv:,.0f} XOF")
                         st.divider()
                         col2.write("Répartition des Titres du Portefeuille")
                         col2.bar_chart(portfolio.groupby('symbole')['current_qty'].sum())
@@ -236,6 +236,8 @@ with st.form("get_data_form"):
                             hide_index=True
                         ) 
                         st.divider()
+                        # df_quotes['Cours Clôture (FCFA)'] = df_quotes['Cours Clôture (FCFA)'].str.replace(' ','').astype(float)
+                        df_quotes[['Cours Ouverture (FCFA)','Cours veille (FCFA)','Cours Clôture (FCFA)','Volume']] = df_quotes[['Cours Ouverture (FCFA)','Cours veille (FCFA)','Cours Clôture (FCFA)','Volume']].replace(' ','', regex=True).astype(float)
                         if df_quotes is not None:
                             st.title("💹 Cours Actuels des Actions à la BRVM")
                             st.write(df_quotes)
