@@ -3,10 +3,11 @@ import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
+from openai import OpenAI
+import matplotlib.pyplot as plt
 # from ..connexion_function import login, logout
 from shares.config import API_URL, USER_ID, PORTEFEUILLES
 from shares.connexion_function import logout
-from openai import OpenAI
 
 # import requests
 from bs4 import BeautifulSoup
@@ -122,7 +123,7 @@ with st.form("get_data_form"):
         if submit:
                 try:
                     df_quotes = extraire_table_bourse()
-                    
+                    st.write(f"Portefeuille sélectionné : {st.session_state['nom_selectionne']} (ID: {st.session_state['portefeuille_id']})")
                         # Mettre à jour la table actions dans la BD avec les nouveaux cours
                         # response = requests.post(f"{API_URL}/actions/update_prices", json=df_quotes[['nom_entreprise','date_mise_a_jour', 'dernier_cours']].to_dict(orient='records'))
                         # if response.status_code == 200:
@@ -168,7 +169,6 @@ with st.form("get_data_form"):
                             portfolio['current_qty'] = portfolio['quantite'] - portfolio['quantity_sold']
                         else:
                             portfolio['current_qty'] = portfolio['quantite']
-
                         # Filtrer les lignes où on ne possède plus d'actions
                         portfolio = portfolio[portfolio['current_qty'] > 0]
                        
@@ -186,7 +186,7 @@ with st.form("get_data_form"):
                         portfolio['Investissement'] = portfolio['current_qty'] * portfolio['CMP']
                         portfolio['+/- Value'] = portfolio['Valeur Actuelle'] - portfolio['Investissement']
                         portfolio['+/- %'] = (portfolio['+/- Value'] / portfolio['Investissement']) * 100
-                        portfolio['+/- Value marché'] = (portfolio['dernier_cours'] - portfolio['CMP']) 
+                        portfolio['+/- Value marché'] = portfolio['dernier_cours'] - portfolio['CMP']
                         # --- AFFICHAGE ---
                     
                     # Métriques globales
@@ -198,26 +198,22 @@ with st.form("get_data_form"):
                         col1.metric("Plus-Value Totale", f"{total_pv:,.0f} XOF", delta=f"{total_pv:,.0f}")
                         col1.metric("Valeur Totale portefeuille", f"{portfolio['Valeur Actuelle'].sum():,.0f} XOF")
                         col1.metric("Investissement Total", f"{total_inv:,.0f} XOF")
-                        st.divider()
+                       
                         col2.write("Répartition des Titres du Portefeuille")
                         col2.bar_chart(portfolio.groupby('symbole')['current_qty'].sum())
                         col3.write("Répartition des Plus-Values Absolues")
                         col3.bar_chart(portfolio.groupby('symbole')['+/- Value'].sum(),color="#009A76")
-                        col4.write("Répartition des symboles par Secteur")
-                        col4.plotly_chart(
-                            px.pie(portfolio, values='current_qty', names='secteur', hole=0.4),
-                            use_container_width=True
-                        )
+                        # Répartition des +/- Value par Secteur
+                        col4.write("Répartition des Plus-Values Absolues par Secteur")
+                        col4.bar_chart(portfolio.groupby('secteur')['+/- Value'].sum(),color="#CDCD28")
+                       
                         st.divider()
                       
                         # Nettoyage des colonnes pour l'utilisateur
-                        df_final = portfolio[[
-                            'symbole', 'nom_entreprise','secteur', 'current_qty', 'CMP', 
-                            'dernier_cours','+/- Value marché', '+/- Value', '+/- %'
-                        ]].copy()
+                        df_final = portfolio[['symbole', 'nom_entreprise','secteur', 'current_qty', 'CMP','Investissement', 'Valeur Actuelle', 'dernier_cours', '+/- Value marché', '+/- Value', '+/- %']].copy()
 
                         # Renommer les colonnes
-                        df_final.columns = ['Symbole', 'Société', 'Secteur', 'Qté', 'CMP (XOF)', 'Prix Marché', 'Plus-Value Marché', 'Plus-Value Abs.', 'Plus-Value %']
+                        df_final.columns = ['Symbole', 'Société', 'Secteur', 'Quantité', 'CMP (XOF)','Investissement', 'Valeur Actuelle', 'Prix Marché', 'Plus-Value Marché', 'Plus-Value Abs.', 'Plus-Value %']
                         # Formatage et coloration
                         def style_plus_value(val):
                             color = 'green' if val > 0 else 'red'
@@ -232,7 +228,7 @@ with st.form("get_data_form"):
                                 'Plus-Value Abs.': '{:,.0f}',
                                 'Plus-Value %': '{:,.2f}%'
                             }).applymap(style_plus_value, subset=['Plus-Value Marché', 'Plus-Value Abs.', 'Plus-Value %']),
-                            use_container_width=True,
+                            width='content',
                             hide_index=True
                         ) 
                         st.divider()
@@ -240,8 +236,27 @@ with st.form("get_data_form"):
                         df_quotes[['Cours Ouverture (FCFA)','Cours veille (FCFA)','Cours Clôture (FCFA)','Volume']] = df_quotes[['Cours Ouverture (FCFA)','Cours veille (FCFA)','Cours Clôture (FCFA)','Volume']].replace(' ','', regex=True).astype(float)
                         if df_quotes is not None:
                             st.title("💹 Cours Actuels des Actions à la BRVM")
+                            # Ajouter le secteur si besoin
+                            if 'secteur' not in df_quotes.columns:
+                                df_quotes = df_quotes.merge(df_stocks[['symbole','secteur']], left_on='Symbole', right_on='symbole', how='left').drop(columns=['symbole'])
+                            # st.pyplot(px.bar(df_quotes, x='Symbole', y='Cours Clôture (FCFA)', title="Cours de Clôture des Actions à la BRVM").update_layout(yaxis_title='Cours Clôture (FCFA)', xaxis_title='Symbole'))
+                            # camembert des secteurs
+                            col1, col2 = st.columns(2)
+                            with col1:
+                                fig_cours = px.bar(df_quotes, x='Symbole', y='Cours Clôture (FCFA)', title="Cours de Clôture des Actions à la BRVM")
+                                fig_cours.update_layout(yaxis_title='Cours Clôture (FCFA)', xaxis_title='Symbole')
+                                st.plotly_chart(fig_cours, width='content')
+                            with col2:
+                                secteur_counts = df_quotes['secteur'].value_counts()
+                                fig_secteur = px.pie(values=secteur_counts.values, names=secteur_counts.index, title="Répartition des société par Secteur", hole=0.4)
+                                st.plotly_chart(fig_secteur, width='content')
+                            st.divider()
+
+                            fig_cours = px.bar(df_quotes, x='Nom', y='Variation (%)', title="Variation des cours des Actions à la BRVM")
+                            fig_cours.update_layout(yaxis_title='Variation (%)', xaxis_title='Societé')
+                            st.plotly_chart(fig_cours, width='content')
+                            st.title("📋 Données Complètes des Actions à la BRVM")
                             st.write(df_quotes)
-                        
                         st.divider()
                         ## titre historique transactions
                         st.title("📜 Historique des Transactions")
@@ -255,7 +270,7 @@ with st.form("get_data_form"):
                         # Renommer les colonnes
                         df_final.columns = ['Symbole', 'Société', 'Type Transaction', 'Quantité', 'Prix Unit.', 'Frais Courtage', 'Date Transaction']
                         
-                        st.dataframe(df_final.sort_values(by='Date Transaction', ascending=False), use_container_width=True, hide_index=True)
+                        st.dataframe(df_final.sort_values(by='Date Transaction', ascending=False), width='content', hide_index=True)
                         
                     else:
                         st.info("Effectuez votre première transaction pour voir l'analyse.")
@@ -283,11 +298,11 @@ with st.form("get_data_form"):
 #     col1, col2 = st.columns([2, 1])
     
 #     with col1:
-#         st.dataframe(portfolio[['symbol', 'company_name', 'qty_signed', 'sector']], use_container_width=True)
+#         st.dataframe(portfolio[['symbol', 'company_name', 'qty_signed', 'sector']], width='content')
     
 #     with col2:
 #         fig = px.pie(portfolio, values='qty_signed', names='symbol', title="Répartition des titres", hole=0.4)
-#         st.plotly_chart(fig, use_container_width=True)
+#         st.plotly_chart(fig, width='content')
 # else:
 #     st.info("Aucune transaction enregistrée pour le moment.")
 

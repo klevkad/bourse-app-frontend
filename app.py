@@ -1,7 +1,7 @@
 import streamlit as st
 from shares.connexion_function import login, logout
 
-st.set_page_config(page_title="Authentification BRVM", layout="wide", initial_sidebar_state="expanded", page_icon="🏦")
+st.set_page_config(page_title="Authentification BRVM", layout="wide", initial_sidebar_state="expanded", page_icon="🏦", )
 
 # Vérification de l'état de connexion
 if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
