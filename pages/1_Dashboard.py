@@ -22,8 +22,6 @@ else:
 user_id = USER_ID
 portefeuille_list = st.session_state["portefeuilles"] if "portefeuilles" in st.session_state else []
 
-# OPENAI_API_KEY='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'
-
 # # st.write(f"Utilisation de l'API Key: {'Définie' if OPENAI_API_KEY else 'Non définie'}")
 # if 'openai_api_key' not in st.session_state:
 #     st.session_state.openai_api_key = OPENAI_API_KEY
