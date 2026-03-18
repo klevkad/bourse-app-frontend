@@ -58,8 +58,7 @@ if st.button("🔄 Actualiser les données"):
 try:
     df_quotes = extraire_table_bourse()
     st.write(f"Portefeuille sélectionné : {st.session_state['nom_selectionne']} (ID: {st.session_state['portefeuille_id']})")
-  
-# 1. Récupération des données via l'API
+    # 1. Récupération des données via l'API
     @st.cache_data(ttl=300) # Cache pour éviter de surcharger l'API
     def fetch_all_data():
         trans = requests.get(f"{API_URL}/portefeuille/{st.session_state["portefeuille_id"]}/transactions").json()
@@ -75,7 +74,7 @@ try:
         # --- CALCUL DU PORTFOLIO ---
         df_t["type_transaction"] = df_t["type_transaction"].str.strip().str.lower()
         # A. Calcul de la quantité nette et du CMP
-        # On filtre sur les achats pour le CMP
+        # On filtre sur les achats pour le CMP et la quantité totale achetée
         df_buys = df_t[df_t['type_transaction'] == 'achat'].copy()
         
         df_buys['total_cost'] = df_buys['quantite'] * df_buys['prix_unitaire'] + df_buys['frais_courtage']
@@ -109,6 +108,9 @@ try:
         # dernier_cours de type float avec suppression des espaces
         portfolio['dernier_cours']= portfolio['symbole'].map(df_quotes.set_index('Symbole')['Cours Clôture (FCFA)'].str.replace(' ','').astype(float))
         st.title("📈 Analyse du Portefeuille")
+        for p in portefeuille_list:
+            st.metric("Liquidités disponibles", f"{p['solde_especes']:,.0f} XOF", delta=f"{p['solde_especes']:,.0f}")
+    
         st.divider()
         # D. Calcul de la Plus-value
         portfolio['Valeur Actuelle'] = portfolio['current_qty'] * portfolio['dernier_cours']
@@ -117,7 +119,7 @@ try:
         portfolio['+/- %'] = (portfolio['+/- Value'] / portfolio['Investissement']) * 100
         portfolio['+/- Value marché'] = portfolio['dernier_cours'] - portfolio['CMP']
         # --- AFFICHAGE ---
-    
+       
     # Métriques globales
         total_pv = portfolio['+/- Value'].sum()
         total_inv = portfolio['Investissement'].sum()
