@@ -122,7 +122,7 @@ with tab2:
     
     stock_options = {s['symbole']: s['id'] for s in stocks}
     selected_stock_sym = st.selectbox("Action", list(stock_options.keys()))
-    type_ordre = st.selectbox("Type", ["achat", "appro","retrait", "vente"])
+    type_ordre = st.selectbox("Type", ["achat", "appro","Dividende","retrait", "Vente"])
     quantite = st.number_input("Quantité", min_value=1, value=1)
     prix = st.number_input("Prix unitaire (XOF)", min_value=1.0, value=1500.0)
     frais_courtage = st.number_input("Frais de courtage (XOF 1%)", min_value=0.0, value=prix * quantite * 0.01 )
