@@ -108,22 +108,35 @@ try:
         # dernier_cours de type float avec suppression des espaces
         portfolio['dernier_cours']= portfolio['symbole'].map(df_quotes.set_index('Symbole')['Cours Clôture (FCFA)'].str.replace(' ','').astype(float))
         st.title("📈 Analyse du Portefeuille")
-        for p in portefeuille_list:
-            st.metric("Liquidités disponibles", f"{p['solde_especes']:,.0f} XOF", delta=f"{p['solde_especes']:,.0f}")
-    
+       
         st.divider()
-        # D. Calcul de la Plus-value
+       
         portfolio['Valeur Actuelle'] = portfolio['current_qty'] * portfolio['dernier_cours']
         portfolio['Investissement'] = portfolio['current_qty'] * portfolio['CMP']
         portfolio['+/- Value'] = portfolio['Valeur Actuelle'] - portfolio['Investissement']
         portfolio['+/- %'] = (portfolio['+/- Value'] / portfolio['Investissement']) * 100
         portfolio['+/- Value marché'] = portfolio['dernier_cours'] - portfolio['CMP']
-        # --- AFFICHAGE ---
+       
        
     # Métriques globales
         total_pv = portfolio['+/- Value'].sum()
         total_inv = portfolio['Investissement'].sum()
         total_plus_value_pct = (total_pv/total_inv)*100
+
+
+         
+        col1, col2, col3= st.columns(3)
+        for p in portefeuille_list:
+            col1.metric("Liquidités disponibles", f"{p['solde_especes']:,.0f} XOF", delta=f"{p['solde_especes']:,.0f}")
+
+    
+        # calcul total dividendes
+        total_dividendes = df_t[df_t['type_transaction'] == 'dividende']['prix_unitaire'].sum()
+        col2.metric("Total Dividendes perçus", f"{total_dividendes:,.0f} XOF", delta=f"{total_dividendes:,.0f}")
+
+        # calcul total des bénéfices potentiels = total_dividendes+total_pv
+        col3.metric("Bénéfices Potentiels", f"{total_dividendes + total_pv:,.0f} XOF", delta=f"{total_dividendes + total_pv:,.0f}")
+       
         col1, col2,col3, col4 = st.columns(4)
         col1.metric("Plus-Value % Totale", f"{total_plus_value_pct:,.2f} %", delta=f"{total_plus_value_pct:,.0f}")
         col1.metric("Plus-Value Totale", f"{total_pv:,.0f} XOF", delta=f"{total_pv:,.0f}")
