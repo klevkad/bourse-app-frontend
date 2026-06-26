@@ -3,7 +3,7 @@ import streamlit as st
 import requests
 import pandas as pd
 import plotly.express as px
-from openai import OpenAI
+# from openai import OpenAI
 import matplotlib.pyplot as plt
 from shares.config import API_URL, USER_ID, PORTEFEUILLES
 from shares.connexion_function import logout
@@ -147,7 +147,7 @@ try:
         df_final.columns = ['Symbole', 'Société', 'Secteur', 'Quantité', 'CMP (XOF)','Investissement', 'Valeur Actuelle', 'Prix Marché', 'Plus-Value Marché', 'Plus-Value Abs.', 'Plus-Value %']
         # Formatage et coloration
         def style_plus_value(val):
-            color = 'green' if val > 0 else 'red'
+            color = 'blue' if val > 0 else 'red'
             return f'color: {color}; font-weight: bold'
         # Portefeuille titres détenus
         st.title("🗒️ Analyse détaillée du Portefeuille")
@@ -158,7 +158,7 @@ try:
                 'Plus-Value Marché': '{:,.0f}',
                 'Plus-Value Abs.': '{:,.0f}',
                 'Plus-Value %': '{:,.2f}%'
-            }).applymap(style_plus_value, subset=['Plus-Value Marché', 'Plus-Value Abs.', 'Plus-Value %']),
+            }).map(style_plus_value, subset=['Plus-Value Marché', 'Plus-Value Abs.', 'Plus-Value %']),
             width='content',
             hide_index=True
         ) 

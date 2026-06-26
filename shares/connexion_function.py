@@ -7,6 +7,8 @@ def login():
     
     with st.form("login_form"):
         user_id = st.number_input("Entrez votre ID Utilisateur (ex: 1)", min_value=1, step=1)
+        user_email = st.text_input("Entrez votre email (ex: utilisateur@example.com)")
+        user_password = st.text_input("Entrez votre mot de passe", type="password")
         submit = st.form_submit_button("Se connecter")
         
         if submit:
