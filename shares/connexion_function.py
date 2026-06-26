@@ -13,7 +13,7 @@ def login():
          
         if submit:
             try:
-                response = requests.get(f"{API_URL}/users/login", params={"email": user_email, "password": user_password})
+                response = requests.post(f"{API_URL}/users/login", json={"email": user_email, "password": user_password})
                 if response.status_code == 200:
                     user_data = response.json()
                     # Sauvegarde de la session
