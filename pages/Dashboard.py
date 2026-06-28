@@ -134,8 +134,8 @@ def gauge_chart(value: float, title: str, min_val=0, max_val=100, suffix="%") ->
             "bgcolor": "white",
             "borderwidth": 0,
             "steps": [
-                {"range": [0, 33], "color": "#fee2e2"},
-                {"range": [33, 66], "color": "#fef9c3"},
+                {"range": [0, 33], "color": "#d16969"},
+                {"range": [33, 66], "color": "#065fd2"},
                 {"range": [66, 100], "color": "#dcfce7"},
             ],
         },
@@ -332,7 +332,9 @@ try:
                 f"{ind['n_positif']} titre(s) en hausse / {ind['n_negatif']} en baisse"
             )
         with g2:
-            perf_norm = min(max(ind["total_pv_pct"] + 50, 0), 100)  # centré sur 50
+            BENCHMARK_ANNUEL = 8.0  # rendement moyen BRVM en %
+            perf_relative = ind["total_pv_pct"] - BENCHMARK_ANNUEL
+            perf_norm = min(max(perf_relative + 50, 0), 100)
             st.plotly_chart(
                 gauge_chart(perf_norm, "Performance (centrée 0%)", suffix="%"),
                 use_container_width=True,
