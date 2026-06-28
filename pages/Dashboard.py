@@ -267,7 +267,7 @@ try:
         portfolio["dernier_cours"] = portfolio["symbole"].map(
             df_quotes.set_index("Symbole")["Cours Clôture (FCFA)"]
             .str.replace(" ", "")
-            .astype(float)
+            .astype(int)
         )
 
         portfolio["Valeur Actuelle"]   = portfolio["current_qty"] * portfolio["dernier_cours"]
@@ -432,7 +432,7 @@ try:
             color="secteur",
             text="Symbole",
             hover_data=["Société", "CMP", "Prix Marché"],
-            title="Poids vs Performance par titre",
+            title="Investissement vs Performance par titre",
             labels={"+/- %": "Performance (%)", "Valeur Actuelle": "Valeur (XOF)"},
             size_max=60,
         )
@@ -440,8 +440,21 @@ try:
         fig_bubble.add_vline(x=0, line_dash="dash", line_color="gray")
         st.plotly_chart(fig_bubble, use_container_width=True)
 
+        
+        # Matrice de corrélation +/- % / quantite / Investissement
+        st.subheader("📉 Matrice de corrélation")
+        corr_cols = ["Quantité", "CMP", "Investissement", "Valeur Actuelle", "+/- Value", "+/- %"]
+        corr_matrix = df_display[corr_cols].corr()
+        fig_corr = px.imshow(
+            corr_matrix,
+            text_auto=True,
+            color_continuous_scale="RdBu_r",
+            title="Matrice de corrélation des indicateurs clés",
+            width=900,
+            height=600
+        )
+        st.plotly_chart(fig_corr, use_container_width=True)
         st.divider()
-
         # ════════════════════════════════════════════════════
         # SECTION 4 – SIGNAUX AUTOMATIQUES
         # ════════════════════════════════════════════════════
