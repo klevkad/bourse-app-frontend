@@ -6,14 +6,6 @@ import plotly.express as px
 from shares.config import API_URL, USER_ID, PORTEFEUILLES
 from shares.connexion_function import logout
 
-if "authenticated" not in st.session_state or not st.session_state["authenticated"]:
-    st.warning("Veuillez vous connecter sur la page d'accueil.")
-    st.stop()
-else:
-    st.sidebar.success(f"Connecté : {st.session_state['username']}")
-    if st.sidebar.button("👆 Déconnexion"):
-        logout()
-
 def get_actions():
     return requests.get(f"{API_URL}/actions/").json()
 
