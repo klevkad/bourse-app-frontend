@@ -61,6 +61,7 @@ def compute_indicators(portfolio: pd.DataFrame, total_dividendes: float) -> dict
 
     # --- Concentration (Herfindahl-Hirschman Index) ---
     # HHI proche de 1 = très concentré, proche de 0 = très diversifié
+    
     poids = portfolio["Valeur Actuelle"] / total_val
     hhi = (poids ** 2).sum()
     diversification_score = round((1 - hhi) * 100, 1)  # 0–100, 100 = parfaitement diversifié
@@ -300,7 +301,7 @@ try:
             c1.metric("💰 Liquidités disponibles", f"{p['solde_especes']:,.0f} XOF")
         c2.metric("💵 Valeur du portefeuille",   f"{ind['total_val']:,.0f} XOF")
         c3.metric("📥 Dividendes perçus",         f"{total_dividendes:,.0f} XOF")
-        delta_color = "normal" if ind["total_pv"] >= 0 else "inverse"
+        delta_color = "violet" if ind["total_pv"] >= 0 else "red"
         c4.metric(
             "💹 Plus-Value totale",
             f"{ind['total_pv']:,.0f} XOF",
@@ -485,7 +486,7 @@ try:
         ).round(1)
 
         def style_pv(val):
-            color = "#0a1ce4" if val > 0 else "#dc2626"
+            color = "#792ced" if val > 0 else "#dc2626"
             return f"color: {color}; font-weight: bold"
 
         st.dataframe(
