@@ -14,9 +14,9 @@ def post_transaction(data):
 
 
 st.title("🚀 Terminal de Trading")
-tab1, tab2 = st.tabs(["📊 Historique transaction", "📈 Faire une transaction"])
+tab1, tab2 = st.tabs([ "📈 Faire une transaction","📊 Historique transaction"])
 
-with tab1:
+with tab2:
     # --- SECTION 3 : HISTORIQUE ---
     portefeuille_map = {p["nom_portefeuille"]: p["id"] for p in PORTEFEUILLES}
     with st.form("get_data_form"):
@@ -109,7 +109,7 @@ with tab1:
                     st.error(f"Erreur lors de la sélection du portefeuille.{str(e)}")
 
 
-with tab2:
+with tab1:
     stocks = get_actions()
     portefeuille_id = st.session_state.get("portefeuilles", [])[0]["id"] if st.session_state.get("portefeuilles") else 1
     stock_options = {s['symbole']: s['id'] for s in stocks}
