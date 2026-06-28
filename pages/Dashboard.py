@@ -485,7 +485,7 @@ try:
         ).round(1)
 
         def style_pv(val):
-            color = "#16a34a" if val > 0 else "#dc2626"
+            color = "#0a1ce4" if val > 0 else "#dc2626"
             return f"color: {color}; font-weight: bold"
 
         st.dataframe(
