@@ -267,7 +267,7 @@ try:
         portfolio["dernier_cours"] = portfolio["symbole"].map(
             df_quotes.set_index("Symbole")["Cours Clôture (FCFA)"]
             .str.replace(" ", "")
-            .astype(int)
+            .astype(float)
         )
 
         portfolio["Valeur Actuelle"]   = portfolio["current_qty"] * portfolio["dernier_cours"]
@@ -296,18 +296,20 @@ try:
         st.title("📈 Analyse du Portefeuille")
         st.divider()
 
-        c1, c2, c3, c4 = st.columns(4)
+        c1, c2, c3, c4, c5 = st.columns(5)
         for p in portefeuille_list:
             c1.metric("💰 Liquidités disponibles", f"{p['solde_especes']:,.0f} XOF")
-        c2.metric("💵 Valeur du portefeuille",   f"{ind['total_val']:,.0f} XOF")
-        c3.metric("📥 Dividendes perçus",         f"{total_dividendes:,.0f} XOF")
+        c2.metric("📊 Investissements", f"{ind['total_inv']:,.0f} XOF")
+        c3.metric("💵 Valeur du portefeuille",   f"{ind['total_val']:,.0f} XOF")
+        c4.metric("📥 Dividendes perçus",         f"{total_dividendes:,.0f} XOF")
         delta_color = "violet" if ind["total_pv"] >= 0 else "red"
-        c4.metric(
+        c5.metric(
             "💹 Plus-Value totale",
             f"{ind['total_pv']:,.0f} XOF",
             delta=f"{ind['total_pv_pct']:+.2f}%",
             delta_color=delta_color,
         )
+        
 
         c1, c2, c3, c4 = st.columns(4)
         c1.metric("📊 Rendement total (div. inclus)", f"{ind['rendement_total']:+.2f}%")
@@ -375,7 +377,7 @@ try:
                 x="Symbole",
                 y="+/- %",
                 color="+/- %",
-                color_continuous_scale=["#ef4444", "#f59e0b", "#22c55e"],
+                color_continuous_scale=["#ef4444", "#f5610b", "#1b7a00"],
                 title="Performance par titre (%)",
                 text=df_display.sort_values("+/- %")["+/- %"].map(lambda v: f"{v:+.1f}%"),
             )
