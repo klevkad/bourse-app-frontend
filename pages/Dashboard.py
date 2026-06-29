@@ -442,10 +442,13 @@ try:
         fig_bubble.add_vline(x=0, line_dash="dash", line_color="gray")
         st.plotly_chart(fig_bubble, use_container_width=True)
 
-        
+        # Poids dans le portefeuille
+        df_display["Poids (%)"] = (
+            df_display["Valeur Actuelle"] / df_display["Valeur Actuelle"].sum() * 100
+        ).round(1)
         # Matrice de corrélation +/- % / quantite / Investissement
         st.subheader("📉 Matrice de corrélation")
-        corr_cols = ["Quantité", "CMP", "Investissement", "Valeur Actuelle", "+/- Value", "+/- %"]
+        corr_cols = ["Poids (%)","Quantité", "CMP", "Investissement", "Valeur Actuelle", "+/- Value", "+/- %"]
         corr_matrix = df_display[corr_cols].corr()
         fig_corr = px.imshow(
             corr_matrix,
@@ -494,11 +497,6 @@ try:
         df_final["Investissement"]  = df_final["Investissement"].round(0).astype(int)
         df_final["Valeur Actuelle"] = df_final["Valeur Actuelle"].round(0).astype(int)
         df_final["Quantité"]        = df_final["Quantité"].astype(int)
-
-        # Poids dans le portefeuille
-        df_final["Poids (%)"] = (
-            df_final["Valeur Actuelle"] / df_final["Valeur Actuelle"].sum() * 100
-        ).round(1)
 
         def style_pv(val):
             color = "#792ced" if val > 0 else "#dc2626"
