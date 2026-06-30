@@ -486,12 +486,12 @@ try:
         df_final = df_display[[
             "Symbole", "Société", "secteur","Poids (%)", "Quantité", "CMP",
             "Investissement", "Valeur Actuelle", "Prix Marché",
-            "+/- Value marché", "+/- Value", "+/- %","Poids (%)"
+            "+/- Value marché", "+/- Value", "+/- %"
         ]].copy()
         df_final.columns = [
             "Symbole", "Société", "Secteur","Poids (%)", "Quantité", "CMP (XOF)",
             "Investissement", "Valeur Actuelle", "Prix Marché",
-            "Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %","Poids (%)",
+            "Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %",
         ]
         df_final["CMP (XOF)"]      = df_final["CMP (XOF)"].round(0).astype(int)
         df_final["Investissement"]  = df_final["Investissement"].round(0).astype(int)
