@@ -5,7 +5,7 @@ Cette mise à jour apporte une analyse financière approfondie du portefeuille, 
 ### 📈 Nouveaux Indicateurs de Performance (`compute_indicators`)
 * **Rendement Total :** Prise en compte des dividendes perçus en plus de la simple plus-value latente.
 * **Score de Diversification (0–100) :** Basé sur l'indice de *Herfindahl-Hirschman (HHI)* pour mesurer scientifiquement la concentration réelle du portefeuille.
-    Interprétation
+    - Interprétation
     HHI	Niveau de concentration
     < 0,10	Très bien diversifié
     0,10 à 0,18	Diversification correcte
