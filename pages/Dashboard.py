@@ -151,7 +151,7 @@ def gauge_chart(value: float, title: str, min_val=0, max_val=100, suffix="%") ->
 def generate_signals(ind: dict, portfolio: pd.DataFrame) -> list[dict]:
     signals = []
 
-    if ind["secteur_dominant_pct"] > 50:
+    if ind["secteur_dominant_pct"] > 40:
         signals.append({
             "type": "warning",
             "icon": "⚠️",
@@ -435,7 +435,7 @@ try:
             color="secteur",
             text="Symbole",
             hover_data=["Société", "CMP", "Prix Marché"],
-            title="Investissement vs Performance par titre",
+            title="Bubble Chart (Risque × Performance × Taille)",
             labels={"+/- %": "Performance (%)", "Valeur Actuelle": "Valeur (XOF)"},
             size_max=60,
         )
