@@ -485,12 +485,12 @@ try:
         st.title("🗒️ Analyse détaillée du Portefeuille")
 
         df_final = df_display[[
-            "Symbole", "Société", "secteur", "Quantité", "CMP",
+            "Symbole", "Société", "secteur","Poids (%)", "Quantité", "CMP",
             "Investissement", "Valeur Actuelle", "Prix Marché",
-            "+/- Value marché", "+/- Value", "+/- %",
+            "+/- Value marché", "+/- Value", "+/- %"
         ]].copy()
         df_final.columns = [
-            "Symbole", "Société", "Secteur", "Quantité", "CMP (XOF)",
+            "Symbole", "Société", "Secteur","Poids (%)", "Quantité", "CMP (XOF)",
             "Investissement", "Valeur Actuelle", "Prix Marché",
             "Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %",
         ]
@@ -515,7 +515,7 @@ try:
                 "Plus-Value %":     "{:+,.2f}%",
                 "Poids (%)":        "{:.1f}%",
             })
-            .map(style_pv, subset=["Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %"]),
+            .map(style_pv, subset=["Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %","Poids (%)"]),
             use_container_width=True,
             hide_index=True,
         )
