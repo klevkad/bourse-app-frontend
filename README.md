@@ -17,7 +17,23 @@ Cette mise à jour apporte une analyse financière approfondie du portefeuille, 
   2. **Barres de performance par titre :** Visualisation des gains/pertes individuels avec code couleur conditionnel.
   3. **Analyses sectorielles croisées :** Graphique combinant le poids sectoriel (en %) et la plus-value absolue par secteur.
   4. **Bubble Chart (Risque × Performance × Taille) :** Graphique à trois dimensions idéal pour identifier en un coup d'œil les titres moteurs ou à risque du portefeuille.
+  # Lecture du Bubble Chart — Les 4 zones
 
+    ## 🟢 Zone idéale (droite · haut)
+    Titres **bien pondérés ET très performants**.
+    > À conserver et potentiellement renforcer.
+    ---
+    ## 🟡 Zone vigilance (gauche · haut)
+    Titres **lourds mais qui sous-performent**.
+    > Capital important mal rentabilisé.
+    ---
+    ## 🔵 Zone opportunité (droite · bas)
+    Titres **très performants mais sous-pondérés**.
+    > Candidats au renforcement.
+    ---
+    ## 🔴 Zone risque (gauche · bas)
+    **Petites positions qui perdent de la valeur**.
+    > Surveiller ou arbitrer.
 ### 🚨 Signaux et Alertes Automatiques (`generate_signals`)
 Le système surveille désormais le portefeuille en temps réel et génère des alertes de gestion des risques :
 * **Alerte de concentration sectorielle :** Déclenchée si un seul secteur dépasse **50%** de l'allocation globale.

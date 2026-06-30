@@ -272,7 +272,8 @@ try:
 
         portfolio["Valeur Actuelle"]   = portfolio["current_qty"] * portfolio["dernier_cours"]
         portfolio["Investissement"]    = portfolio["current_qty"] * portfolio["CMP"]
-        portfolio["+/- Value"]         = portfolio["Valeur Actuelle"] - portfolio["Investissement"]
+        portfolio["+/- Value"] = portfolio["Valeur Actuelle"] - portfolio["Investissement"]
+        portfolio["+/- Value"] = portfolio["+/- Value"].astype(float)
         portfolio["+/- %"]             = (portfolio["+/- Value"] / portfolio["Investissement"]) * 100
         portfolio["+/- Value marché"]  = portfolio["dernier_cours"] - portfolio["CMP"]
 
