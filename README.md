@@ -7,10 +7,10 @@ Cette mise à jour apporte une analyse financière approfondie du portefeuille, 
 * **Score de Diversification (0–100) :** Basé sur l'indice de *Herfindahl-Hirschman (HHI)* pour mesurer scientifiquement la concentration réelle du portefeuille.
     - Interprétation
     HHI	Niveau de concentration
-    * < 0,10	Très bien diversifié
-    * 0,10 à 0,18	Diversification correcte
-    * 0,18 à 0,25	Portefeuille assez concentré
-    * > 0,25	Portefeuille fortement concentré
+    1. < 0,10	Très bien diversifié
+    2. 0,10 à 0,18	Diversification correcte
+    3. 0,18 à 0,25	Portefeuille assez concentré
+    4. > 0,25	Portefeuille fortement concentré
 * **Ratio Gain/Perte :** Rapport précis entre la somme des plus-values et la somme des moins-values.
 * **VaR Simplifiée (Value at Risk) à -10% :** Estimation de la perte potentielle en cas de baisse globale du marché de 10%.
 * **Détection Automatique :** Identification instantanée du meilleur et du pire titre du portefeuille.
@@ -28,15 +28,12 @@ Cette mise à jour apporte une analyse financière approfondie du portefeuille, 
     ## 🟢 Zone idéale (droite · haut)
     Titres **bien pondérés ET très performants**.
     > À conserver et potentiellement renforcer.
-    ---
     ## 🟡 Zone vigilance (gauche · haut)
     Titres **lourds mais qui sous-performent**.
     > Capital important mal rentabilisé.
-    ---
     ## 🔵 Zone opportunité (droite · bas)
     Titres **très performants mais sous-pondérés**.
     > Candidats au renforcement.
-    ---
     ## 🔴 Zone risque (gauche · bas)
     **Petites positions qui perdent de la valeur**.
     > Surveiller ou arbitrer.
