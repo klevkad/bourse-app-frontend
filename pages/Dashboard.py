@@ -489,7 +489,7 @@ try:
             "+/- Value marché", "+/- Value", "+/- %",
         ]].copy()
         df_final.columns = [
-            "Symbole", "Société", "Secteur", "Quantité", "CMP (XOF)",
+            "Symbole", "Société", "Secteur","Poids (%)", "Quantité", "CMP (XOF)",
             "Investissement", "Valeur Actuelle", "Prix Marché",
             "Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %",
         ]
