@@ -151,7 +151,7 @@ def gauge_chart(value: float, title: str, min_val=0, max_val=100, suffix="%") ->
 def generate_signals(ind: dict, portfolio: pd.DataFrame) -> list[dict]:
     signals = []
 
-    if ind["secteur_dominant_pct"] > 50:
+    if ind["secteur_dominant_pct"] > 40:
         signals.append({
             "type": "warning",
             "icon": "⚠️",
@@ -272,7 +272,8 @@ try:
 
         portfolio["Valeur Actuelle"]   = portfolio["current_qty"] * portfolio["dernier_cours"]
         portfolio["Investissement"]    = portfolio["current_qty"] * portfolio["CMP"]
-        portfolio["+/- Value"]         = portfolio["Valeur Actuelle"] - portfolio["Investissement"]
+        portfolio["+/- Value"] = portfolio["Valeur Actuelle"] - portfolio["Investissement"]
+        portfolio["+/- Value"] = portfolio["+/- Value"].astype(float)
         portfolio["+/- %"]             = (portfolio["+/- Value"] / portfolio["Investissement"]) * 100
         portfolio["+/- Value marché"]  = portfolio["dernier_cours"] - portfolio["CMP"]
 
