@@ -6,6 +6,20 @@ Cette mise à jour apporte une analyse financière approfondie du portefeuille, 
 * **Rendement Total :** Prise en compte des dividendes perçus en plus de la simple plus-value latente.
 * **Score de Diversification (0–100) :** Basé sur l'indice de *Herfindahl-Hirschman (HHI)* pour mesurer scientifiquement la concentration réelle du portefeuille.
 * **Ratio Gain/Perte :** Rapport précis entre la somme des plus-values et la somme des moins-values.
+Interprétation
+1. > 2 : excellent
+Entre 1 et 2 : satisfaisant
+2. = 1 : gains = pertes
+3. < 1 : les pertes dépassent les gains
+
+* ** Ratio Rendement / Risque :**
+| Ratio | Niveau    |
+| ----- | --------- |
+| <1    | faible    |
+| 1–2   | correct   |
+| 2–3   | bon       |
+| >3    | excellent |
+
 * **VaR Simplifiée (Value at Risk) à -10% :** Estimation de la perte potentielle en cas de baisse globale du marché de 10%.
 * **Détection Automatique :** Identification instantanée du meilleur et du pire titre du portefeuille.
 * **Analyse Sectorielle :** Identification automatique du secteur dominant et calcul de son poids exact.

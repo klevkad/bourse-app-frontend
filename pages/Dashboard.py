@@ -85,8 +85,8 @@ def compute_indicators(portfolio: pd.DataFrame, total_dividendes: float) -> dict
     n_positif = (portfolio["+/- %"] > 0).sum()
     n_negatif = (portfolio["+/- %"] <= 0).sum()
 
-    # --- Valeur à risque simplifiée : perte potentielle si -10% sur tous les titres ---
-    var_10 = total_val * 0.10
+    # --- Valeur à risque simplifiée : perte potentielle si -50% sur tous les titres ---
+    var_50 = total_val * 0.50
 
     # --- Ratio gain/perte (titres positifs vs négatifs en valeur absolue) ---
     gains = portfolio.loc[portfolio["+/- Value"] > 0, "+/- Value"].sum()
@@ -113,7 +113,7 @@ def compute_indicators(portfolio: pd.DataFrame, total_dividendes: float) -> dict
         secteur_dominant_pct=secteur_dominant_pct,
         n_positif=int(n_positif),
         n_negatif=int(n_negatif),
-        var_10=var_10,
+        var_50=var_50,
         ratio_gain_perte=ratio_gain_perte,
         heaviest_symbole=heaviest["Symbole"],
         heaviest_pct=heaviest_pct,
@@ -282,14 +282,21 @@ try:
         df_display = portfolio.rename(columns={
             "symbole": "Symbole",
             "nom_entreprise": "Société",
-            "secteur": "secteur",
             "current_qty": "Quantité",
             "dernier_cours": "Prix Marché",
         })
 
         ind = compute_indicators(df_display, total_dividendes)
         signals = generate_signals(ind, df_display)
+        portfolio_return = ind["rendement_total"]
 
+        risk = df_display["+/- %"].std()
+
+        ratio_rr = (
+            round(portfolio_return / risk, 2)
+            if risk > 0
+            else None
+        )
         # ════════════════════════════════════════════════════
         # SECTION 1 – MÉTRIQUES GLOBALES
         # ════════════════════════════════════════════════════
@@ -316,6 +323,11 @@ try:
         c2.metric("🏆 Meilleur titre",  f"{ind['best_symbole']}  {ind['best_pct']:+.1f}%")
         c3.metric("📉 Moins bon titre", f"{ind['worst_symbole']}  {ind['worst_pct']:+.1f}%")
         c4.metric("⚖️ Ratio gain/perte", f"{ind['ratio_gain_perte']:.2f}x")
+        
+
+        c1,c2 = st.columns(2)
+        c1.metric("🎯 Ratio de Sharpe", f"{ratio_rr:.2f}")
+        c2.metric("📊 Dispersion des performance (écart-type)", f"{risk:.2f}%")
 
         st.divider()
 
@@ -350,7 +362,7 @@ try:
                 gauge_chart(rg_norm, "Ratio gains / pertes", suffix="%"),
                 use_container_width=True,
             )
-            st.caption(f"Ratio brut : {ind['ratio_gain_perte']:.2f}x  |  VaR –10% : {ind['var_10']:,.0f} XOF")
+            st.caption(f"Ratio brut : {ind['ratio_gain_perte']:.2f}x  |  VaR –50% : {ind['var_50']:,.0f} XOF")
 
         st.divider()
 
@@ -377,7 +389,7 @@ try:
                 x="Symbole",
                 y="+/- %",
                 color="+/- %",
-                color_continuous_scale=["#ef4444", "#f5610b", "#1b7a00"],
+                color_continuous_scale=["#ef4444", "#b3f50b", "#1b7a00"],
                 title="Performance par titre (%)",
                 text=df_display.sort_values("+/- %")["+/- %"].map(lambda v: f"{v:+.1f}%"),
             )
@@ -434,7 +446,7 @@ try:
             color="secteur",
             text="Symbole",
             hover_data=["Société", "CMP", "Prix Marché"],
-            title="Investissement vs Performance par titre",
+            title="Bubble Chart (Risque × Performance × Taille)",
             labels={"+/- %": "Performance (%)", "Valeur Actuelle": "Valeur (XOF)"},
             size_max=60,
         )
