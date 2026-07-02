@@ -326,7 +326,7 @@ try:
         
         c1,c2,c3,c4 = st.columns(4)
         c1.metric("⚖️ Ratio gain/perte", f"{ind['ratio_gain_perte']:.2f}x")
-        c2.metric("🎯 Ratio de Sharpe", f"{ratio_rr:.2f}")
+        c2.metric("🎯 Ratio de Sharpe(rendement/risque)", f"{ratio_rr:.2f}")
         c3.metric("📊 Dispersion des performance (écart-type)", f"{risk:.2f}%")
         c4.metric("📈 Nombre effectif", f"{ind['nombre_effetif']:.1f}")
         st.divider()
@@ -373,7 +373,8 @@ try:
         df_display["Poids (%)"] = (
             df_display["Valeur Actuelle"] / df_display["Valeur Actuelle"].sum() * 100
         ).round(1)
-        df_display["Contribution (%)"] = (df_display["Poids (%)"]/100) * df_display["+/- %"]
+
+        df_display["Contribution (%)"] = (df_display["Poids (%)"]/100) * (df_display["+/- %"]/100)
             
         st.subheader("📊 Répartition et performance")
         col1, col2 = st.columns(2)
