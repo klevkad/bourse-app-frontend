@@ -373,8 +373,8 @@ try:
         df_display["Poids (%)"] = (
             df_display["Valeur Actuelle"] / df_display["Valeur Actuelle"].sum() * 100
         ).round(1)
-
-        df_display["Contribution (%)"] = (df_display["Poids (%)"]/100) * (df_display["+/- %"]/100)
+        
+        df_display["Contribution (%)"] = (df_display["Poids (%)"]/100) * df_display["+/- %"]
             
         st.subheader("📊 Répartition et performance")
         col1, col2 = st.columns(2)
