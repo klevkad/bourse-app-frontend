@@ -105,6 +105,7 @@ def compute_indicators(portfolio: pd.DataFrame, total_dividendes: float) -> dict
         rendement_total=rendement_total,
         diversification_score=diversification_score,
         hhi=hhi,
+        nombre_effetif=1/hhi,
         best_symbole=best["Symbole"],
         best_pct=best["+/- %"],
         worst_symbole=worst["Symbole"],
@@ -304,32 +305,30 @@ try:
         st.title("📈 Analyse du Portefeuille")
         st.divider()
 
-        c1, c2, c3, c4, c5 = st.columns(5)
+        c1, c2, c3, c4 = st.columns(4)
         for p in portefeuille_list:
             c1.metric("💰 Liquidités disponibles", f"{p['solde_especes']:,.0f} XOF")
         c2.metric("📊 Investissements", f"{ind['total_inv']:,.0f} XOF")
         c3.metric("💵 Valeur du portefeuille",   f"{ind['total_val']:,.0f} XOF")
         c4.metric("📥 Dividendes perçus",         f"{total_dividendes:,.0f} XOF")
         delta_color = "violet" if ind["total_pv"] >= 0 else "red"
-        c5.metric(
+        
+        c1, c2, c3, c4 = st.columns(4)
+        c1.metric(
             "💹 Plus-Value totale",
             f"{ind['total_pv']:,.0f} XOF",
             delta=f"{ind['total_pv_pct']:+.2f}%",
             delta_color=delta_color,
         )
+        c2.metric("📊 Rendement total (div. inclus)", f"{ind['rendement_total']:+.2f}%")
+        c3.metric("🏆 Meilleur titre",  f"{ind['best_symbole']}  {ind['best_pct']:+.1f}%")
+        c4.metric("📉 Moins bon titre", f"{ind['worst_symbole']}  {ind['worst_pct']:+.1f}%")
         
-
-        c1, c2, c3, c4 = st.columns(4)
-        c1.metric("📊 Rendement total (div. inclus)", f"{ind['rendement_total']:+.2f}%")
-        c2.metric("🏆 Meilleur titre",  f"{ind['best_symbole']}  {ind['best_pct']:+.1f}%")
-        c3.metric("📉 Moins bon titre", f"{ind['worst_symbole']}  {ind['worst_pct']:+.1f}%")
-        c4.metric("⚖️ Ratio gain/perte", f"{ind['ratio_gain_perte']:.2f}x")
-        
-
-        c1,c2 = st.columns(2)
-        c1.metric("🎯 Ratio de Sharpe", f"{ratio_rr:.2f}")
-        c2.metric("📊 Dispersion des performance (écart-type)", f"{risk:.2f}%")
-
+        c1,c2,c3,c4 = st.columns(4)
+        c1.metric("⚖️ Ratio gain/perte", f"{ind['ratio_gain_perte']:.2f}x")
+        c2.metric("🎯 Ratio de Sharpe", f"{ratio_rr:.2f}")
+        c3.metric("📊 Dispersion des performance (écart-type)", f"{risk:.2f}%")
+        c4.metric("📈 Nombre effectif", f"{ind['nombre_effetif']:.1f}")
         st.divider()
 
         # ════════════════════════════════════════════════════
@@ -370,19 +369,29 @@ try:
         # ════════════════════════════════════════════════════
         # SECTION 3 – GRAPHIQUES
         # ════════════════════════════════════════════════════
+        # Poids dans le portefeuille
+        df_display["Poids (%)"] = (
+            df_display["Valeur Actuelle"] / df_display["Valeur Actuelle"].sum() * 100
+        ).round(1)
+        df_display["Contribution (%)"] = (df_display["Poids (%)"]/100) * df_display["+/- %"]
+            
         st.subheader("📊 Répartition et performance")
         col1, col2 = st.columns(2)
 
         with col1:
-            fig_pie = px.pie(
-                df_display,
-                values="Valeur Actuelle",
-                names="Symbole",
-                title="Poids des titres dans le portefeuille",
-                hole=0.4,
+            fig_contrib = px.bar(
+                df_display.sort_values("Contribution (%)"),
+                x="Symbole",
+                y="Contribution (%)",
+                title="Performance pondérée par titre (%)",
+                color="Contribution (%)",
+                color_continuous_scale=["#ef4444", "#b3f50b", "#1b7a00"],
+                text=df_display.sort_values("Contribution (%)")["Contribution (%)"].map(lambda v: f"{v:+.1f}%"),
             )
-            fig_pie.update_traces(textposition="inside", textinfo="percent+label")
-            st.plotly_chart(fig_pie, use_container_width=True)
+            fig_contrib.update_traces(textposition="outside")
+            fig_contrib.update_layout(coloraxis_showscale=False)
+            # st.caption("Contribution = Poids (%) × Performance (%)")
+            st.plotly_chart(fig_contrib, use_container_width=True)
 
         with col2:
             fig_perf = px.bar(
@@ -397,7 +406,30 @@ try:
             fig_perf.update_traces(textposition="outside")
             fig_perf.update_layout(coloraxis_showscale=False)
             st.plotly_chart(fig_perf, use_container_width=True)
-
+        c1, c2 = st.columns(2)
+        with c1:
+            fig_pie = px.pie(
+                df_display,
+                values="Valeur Actuelle",
+                names="Symbole",
+                title="Poids des titres dans le portefeuille",
+                hole=0.4,
+            )
+            fig_pie.update_traces(textposition="inside", textinfo="percent+label")
+            st.plotly_chart(fig_pie, use_container_width=True)
+        with c2:
+            # Total contribution via une metric
+            total_contrib = df_display["Contribution (%)"].sum()
+            st.plotly_chart(
+                gauge_chart(total_contrib, "Performance pondérée du portefeuille (%)", suffix="/100"),
+                use_container_width=True,
+            )
+            st.caption(
+                "Performance pondérée = Somme(Poids × Performance) sur tous les titres"
+            )
+            # Contribution à la performance par titre
+            
+       
         col3, col4 = st.columns(2)
 
         with col3:
@@ -436,7 +468,8 @@ try:
             fig_pv_sec.update_traces(textposition="outside")
             fig_pv_sec.update_layout(coloraxis_showscale=False)
             st.plotly_chart(fig_pv_sec, use_container_width=True)
-
+        
+        
         # Bubble chart : poids × perf × valeur
         st.subheader("🔵 Vue d'ensemble — Risque / Performance")
         fig_bubble = px.scatter(
@@ -455,10 +488,7 @@ try:
         fig_bubble.add_vline(x=0, line_dash="dash", line_color="gray")
         st.plotly_chart(fig_bubble, use_container_width=True)
 
-        # Poids dans le portefeuille
-        df_display["Poids (%)"] = (
-            df_display["Valeur Actuelle"] / df_display["Valeur Actuelle"].sum() * 100
-        ).round(1)
+        
         # Matrice de corrélation +/- % / quantite / Investissement
         st.subheader("📉 Matrice de corrélation")
         corr_cols = ["Poids (%)","Quantité", "CMP", "Investissement", "Valeur Actuelle", "+/- Value", "+/- %"]
@@ -497,12 +527,12 @@ try:
         st.title("🗒️ Analyse détaillée du Portefeuille")
 
         df_final = df_display[[
-            "Symbole", "Société", "secteur","Poids (%)", "Quantité", "CMP",
+            "Symbole", "Société", "secteur","Poids (%)","Contribution (%)", "Quantité", "CMP",
             "Investissement", "Valeur Actuelle", "Prix Marché",
             "+/- Value marché", "+/- Value", "+/- %"
         ]].copy()
         df_final.columns = [
-            "Symbole", "Société", "Secteur","Poids (%)", "Quantité", "CMP (XOF)",
+            "Symbole", "Société", "Secteur","Poids (%)", "Contribution (%)", "Quantité", "CMP (XOF)",
             "Investissement", "Valeur Actuelle", "Prix Marché",
             "Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %",
         ]
@@ -526,8 +556,9 @@ try:
                 "Plus-Value Abs.":  "{:,.0f}",
                 "Plus-Value %":     "{:+,.2f}%",
                 "Poids (%)":        "{:.1f}%",
+                "Contribution (%)": "{:+.1f}%",
             })
-            .map(style_pv, subset=["Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %","Poids (%)"]),
+            .map(style_pv, subset=["Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %","Poids (%)", "Contribution (%)"]),
             use_container_width=True,
             hide_index=True,
         )
