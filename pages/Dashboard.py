@@ -97,6 +97,7 @@ def compute_indicators(portfolio: pd.DataFrame, total_dividendes: float) -> dict
     heaviest = portfolio.loc[portfolio["Valeur Actuelle"].idxmax()]
     heaviest_pct = round(heaviest["Valeur Actuelle"] / total_val * 100, 1)
 
+
     return dict(
         total_inv=total_inv,
         total_val=total_val,
@@ -119,6 +120,7 @@ def compute_indicators(portfolio: pd.DataFrame, total_dividendes: float) -> dict
         heaviest_symbole=heaviest["Symbole"],
         heaviest_pct=heaviest_pct,
         secteur_poids=secteur_poids,
+        risk=portfolio["+/- %"].std(),
     )
 
 
@@ -212,6 +214,39 @@ def generate_signals(ind: dict, portfolio: pd.DataFrame) -> list[dict]:
                       "Vérifiez les fondamentaux avant de renforcer.",
         })
 
+    if ind["risk"] > 30:
+        signals.append({
+            "type": "warning",
+            "icon": "⚠️",
+            "titre": f"Dispersion élevée ({ind['risk']:.1f}%)",
+            "detail": "Les performances sont très hétérogènes. "
+                      "Certains titres surperforment fortement les autres.",
+        })
+    elif ind["risk"] < 10:
+        signals.append({
+            "type": "success",
+            "icon": "🟢",
+            "titre": f"Dispersion faible ({ind['risk']:.1f}%)",
+            "detail": "Les performances sont homogènes. "
+                      "Le portefeuille est équilibré.",
+        })
+    elif 10 <= ind["risk"] <= 30:
+        signals.append({
+            "type": "info",
+            "icon": "ℹ️",
+            "titre": f"Dispersion modérée ({ind['risk']:.1f}%)",
+            "detail": "Les performances sont modérément hétérogènes. "
+                      "Certains titres surperforment légèrement les autres.",
+        })
+    elif ind["risk"] > 40:
+        signals.append({
+            "type": "danger",
+            "icon": "🔴",
+            "titre": f"Dispersion très élevée ({ind['risk']:.1f}%)",
+            "detail": "Le portefeuille dépend fortement de quelques valeurs. "
+                      "Un choc sur ces titres impactera lourdement la performance globale.",
+        })
+
     return signals
 
 
@@ -292,11 +327,11 @@ try:
         signals = generate_signals(ind, df_display)
         portfolio_return = ind["rendement_total"]
 
-        risk = df_display["+/- %"].std()
+        # risk = df_display["+/- %"].std()
 
         ratio_rr = (
-            round(portfolio_return / risk, 2)
-            if risk > 0
+            round(portfolio_return / ind["risk"], 2)
+            if ind["risk"] > 0
             else None
         )
         # ════════════════════════════════════════════════════
@@ -327,7 +362,7 @@ try:
         c1,c2,c3,c4 = st.columns(4)
         c1.metric("⚖️ Ratio gain/perte", f"{ind['ratio_gain_perte']:.2f}x")
         c2.metric("🎯 Ratio de Sharpe(rendement/risque)", f"{ratio_rr:.2f}")
-        c3.metric("📊 Dispersion des performance (écart-type)", f"{risk:.2f}%")
+        c3.metric("📊 Dispersion des performance (écart-type)", f"{ind['risk']:.2f}%")
         c4.metric("📈 Nombre effectif", f"{ind['nombre_effetif']:.1f}")
         st.divider()
 
@@ -374,7 +409,8 @@ try:
             df_display["Valeur Actuelle"] / df_display["Valeur Actuelle"].sum() * 100
         ).round(1)
         
-        df_display["Contribution (%)"] = (df_display["Poids (%)"] * df_display["+/- %"])/100
+        df_display["Contribution pondérée (%)"] = (df_display["Poids (%)"] * df_display["+/- %"])/100
+        df_display["Contribution (%)"] = (df_display["+/- Value"]/df_display["+/- Value"].sum()) * 100
             
         st.subheader("📊 Répartition et performance")
         col1, col2 = st.columns(2)
@@ -383,11 +419,11 @@ try:
             fig_contrib = px.bar(
                 df_display.sort_values("Contribution (%)"),
                 x="Symbole",
-                y="Contribution (%)",
+                y="Contribution pondérée (%)",
                 title="Performance pondérée par titre (%)",
-                color="Contribution (%)",
+                color="Contribution pondérée (%)",
                 color_continuous_scale=["#ef4444", "#b3f50b", "#1b7a00"],
-                text=df_display.sort_values("Contribution (%)")["Contribution (%)"].map(lambda v: f"{v:+.1f}%"),
+                text=df_display.sort_values("Contribution pondérée (%)")["Contribution pondérée (%)"].map(lambda v: f"{v:+.1f}%"),
             )
             fig_contrib.update_traces(textposition="outside")
             fig_contrib.update_layout(coloraxis_showscale=False)
@@ -420,7 +456,7 @@ try:
             st.plotly_chart(fig_pie, use_container_width=True)
         with c2:
             # Total contribution via une metric
-            total_contrib = df_display["Contribution (%)"].sum()
+            total_contrib = df_display["Contribution pondérée (%)"].sum()
             st.plotly_chart(
                 gauge_chart(total_contrib, "Performance pondérée du portefeuille (%)", suffix="/100"),
                 use_container_width=True,
@@ -429,7 +465,7 @@ try:
                 "Performance pondérée = Somme(Poids × Performance) sur tous les titres"
             )
             # Contribution à la performance par titre
-            
+            contrib_by_title = df_display.groupby("Symbole")["Contribution pondérée (%)"].sum()
        
         col3, col4 = st.columns(2)
 
@@ -528,12 +564,12 @@ try:
         st.title("🗒️ Analyse détaillée du Portefeuille")
 
         df_final = df_display[[
-            "Symbole", "Société", "secteur","Poids (%)","Contribution (%)", "Quantité", "CMP",
+            "Symbole", "Société", "secteur","Poids (%)","Contribution pondérée (%)", "Contribution (%)", "Quantité", "CMP",
             "Investissement", "Valeur Actuelle", "Prix Marché",
             "+/- Value marché", "+/- Value", "+/- %"
         ]].copy()
         df_final.columns = [
-            "Symbole", "Société", "Secteur","Poids (%)", "Contribution (%)", "Quantité", "CMP (XOF)",
+            "Symbole", "Société", "Secteur","Poids (%)", "Contribution pondérée (%)", "Contribution (%)", "Quantité", "CMP (XOF)",
             "Investissement", "Valeur Actuelle", "Prix Marché",
             "Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %",
         ]
@@ -557,9 +593,10 @@ try:
                 "Plus-Value Abs.":  "{:,.0f}",
                 "Plus-Value %":     "{:+,.2f}%",
                 "Poids (%)":        "{:.1f}%",
-                "Contribution (%)": "{:+.1f}%",
+                "Contribution (%)": "{:.1f}%",
+                "Contribution pondérée (%)": "{:+.1f}%",
             })
-            .map(style_pv, subset=["Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %","Poids (%)", "Contribution (%)"]),
+            .map(style_pv, subset=["Plus-Value Marché", "Plus-Value Abs.", "Plus-Value %","Poids (%)", "Contribution pondérée (%)", "Contribution (%)"]),
             use_container_width=True,
             hide_index=True,
         )
