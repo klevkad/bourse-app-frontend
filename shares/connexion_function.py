@@ -46,4 +46,7 @@ def login():
 
 def logout():
     st.session_state["authenticated"] = False
+    st.session_state["user_id"] = None
+    st.session_state["username"] = ""   
+    st.session_state["portefeuilles"] = []
     st.rerun()
