@@ -1,3 +1,5 @@
+from urllib import response
+
 import streamlit as st
 import requests
 from datetime import datetime
@@ -130,6 +132,8 @@ with tab1:
             "date_transaction": datetime.now().strftime("%Y-%m-%d %H:%M")
         }
         res = post_transaction(payload)
+        print(f"Status: {res.status_code}")
+        print(f"Content: '{res.text}'")
         if res.status_code == 200:
             st.success("Ordre exécuté !")
             selected_stock_sym = ""
@@ -138,7 +142,7 @@ with tab1:
             prix = 00.0
             frais_courtage = 0.0
             st.rerun()
-        else:
-            st.error(f"Erreur: {res.json().get('detail')}")
+        else: 
+            st.error(f"Erreur: {res}")
 
 # ... (Insère ici ton code de formulaire POST /transactions/)

@@ -64,4 +64,4 @@ else:
     st.sidebar.page_link(page_trading)
 
 # 6. Exécution de la page active
-pg.run()
+pg.run() 
