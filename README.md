@@ -32,6 +32,8 @@ Entre 1 et 2 : satisfaisant
 * **Le nombre effectif :** Vous possédez bien 5 actions, mais votre portefeuille se comporte presque comme si vous n'en aviez que 1,5.
   Pourquoi ?
   Parce que 80 % de votre argent est investi dans une seule action. Si cette action chute, tout le portefeuille en souffre.
+* **Performance pondérée:** = Σ (poids × perf individuelle)
+* **Performance globale (%):** = PV réelle / capital investi
 ### 📊 Jauges et Graphiques Dynamiques (Plotly)
 * **3 Jauges Visuelles Interactives :** Affichage de la *Diversification*, de la *Performance Globale* et du *Ratio Gains/Pertes* avec un code couleur dynamique (Vert / Orange / Rouge).
 * **4 Graphiques Améliorés :**
